@@ -93,7 +93,7 @@
   #define CORP_WEBSITE_C "www.cxsw3d.com"
 #endif
 #ifndef CORP_WEBSITE_E
-  #define CORP_WEBSITE_E "www.creality.com"
+  #define CORP_WEBSITE_E "www.smith3d.com"
 #endif
 
 #define PAUSE_HEAT
@@ -1069,7 +1069,8 @@ void Popup_Window_Home(const bool parking/*=false*/) {
   }
   else {
     DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * (parking ? 7 : 10)) / 2, 230, parking ? F("Parking") : F("Homing XYZ"));
-    DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 23) / 2, 260, F("Please wait until done."));
+	DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 26) / 2, 260, F("The bed and nozzle may heat up."));
+    DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 23) / 2, 290, F("Please wait until done."));
   }
 }
 
@@ -1084,8 +1085,9 @@ void Popup_Window_Home(const bool parking/*=false*/) {
       DWIN_Frame_AreaCopy(1, 0, 389, 150, 402, 61, 280);
     }
     else {
-      DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 13) / 2, 230, GET_TEXT_F(MSG_BED_LEVELING));
-      DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 23) / 2, 260, F("Please wait until done."));
+      DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 12) / 2, 230, GET_TEXT_F(MSG_BED_LEVELING));
+      DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 20) / 2, 260, F("The bed will heat up."));
+	  DWIN_Draw_String(false, true, font8x16, Popup_Text_Color, Color_Bg_Window, (272 - 8 * 23) / 2, 290, F("Please wait until done."));
     }
   }
 
@@ -2552,6 +2554,12 @@ void HMI_Prepare() {
           gcode.process_subcommands_now_P( PSTR("M220 S100"));
           gcode.process_subcommands_now_P( PSTR("M420 Z0"));
           gcode.process_subcommands_now_P( PSTR("G28"));
+          // Aquece a mesa e o hotend - início
+          gcode.process_subcommands_now_P( PSTR("M140 S60"));
+          gcode.process_subcommands_now_P( PSTR("M190 S60"));
+          gcode.process_subcommands_now_P( PSTR("M104 S200"));
+          gcode.process_subcommands_now_P( PSTR("M109 S200"));
+          // Aquece a mesa e o hotend - fim
           gcode.process_subcommands_now_P( PSTR("G92 E0"));
           //gcode.process_subcommands_now_P( PSTR("G1 F4000 Z10"));
           //gcode.process_subcommands_now_P( PSTR("G1 F4000 X145 Y116"));
@@ -2573,6 +2581,12 @@ void HMI_Prepare() {
         DWIN_UpdateLCD();
         gcode.process_subcommands_now_P( PSTR("M220 S100"));
         gcode.process_subcommands_now_P( PSTR("G28"));
+        // Aquece a mesa e o hotend - início
+        gcode.process_subcommands_now_P( PSTR("M140 S60"));
+        gcode.process_subcommands_now_P( PSTR("M190 S60"));
+        gcode.process_subcommands_now_P( PSTR("M104 S200"));
+        gcode.process_subcommands_now_P( PSTR("M109 S200"));
+        // Aquece a mesa e o hotend - fim
         gcode.process_subcommands_now_P( PSTR("G92 E0"));
         planner.synchronize();
         current_position.e = HMI_ValueStruct.Move_E_scale = 0;
@@ -2795,7 +2809,7 @@ void HMI_Control() {
     Popup_Window_Leveling();
     DWIN_UpdateLCD();
     gcode.process_subcommands_now_P( PSTR("M220 S100"));
-    queue.inject_P(PSTR("G28O\nG29"));
+    queue.inject_P(PSTR("M140 S60\nM190 S60\nG28\nG29 P1\nG29 P3\nG29 S1\nG29 F10\nG29 A"));
   }
 
 #endif
